@@ -1,9 +1,22 @@
 import { Router } from 'express';
 import { getPlayers, createPlayer } from '../services/airtable';
-import { AIRTABLE_API_KEY, AIRTABLE_BASE_ID } from '../config';
+import {
+  AIRTABLE_API_KEY,
+  AIRTABLE_BASE_ID,
+  AIRTABLE_PLAYERS_TABLE,
+} from '../config';
 import axios from 'axios';
 
 const router = Router();
+const REQUIRED_PLAYER_FIELDS = [
+  'Telegram ID',
+  'Name',
+  'Telegram Username',
+  'Games Played',
+  'Individual Rating',
+  'Wins',
+  'Losses',
+];
 
 // GET /players – returns a list of player records from Airtable
 router.get('/', async (_req, res) => {
@@ -27,7 +40,48 @@ router.post('/', async (req, res) => {
     res.status(201).json({ message: 'Player created', record });
   } catch (err) {
     console.error('Error creating player', err);
-    res.status(500).json({ message: 'Failed to create player' });
+    res.status(500).json({
+      message: 'Failed to create player',
+      error: (err as any)?.response?.data || (err as Error).message || 'Unknown error',
+    });
+  }
+});
+
+// GET /players/health – checks Airtable connectivity and schema
+router.get('/health', async (_req, res) => {
+  try {
+    if (!AIRTABLE_API_KEY || !AIRTABLE_BASE_ID) {
+      return res.status(500).json({ ok: false, error: 'Airtable configuration is missing' });
+    }
+    const response = await axios.get(
+      `https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${AIRTABLE_PLAYERS_TABLE}?maxRecords=1`,
+      {
+        headers: {
+          Authorization: `Bearer ${AIRTABLE_API_KEY}`,
+        },
+      },
+    );
+    const records = response.data?.records || [];
+    if (records.length === 0) {
+      return res.json({
+        ok: true,
+        table: AIRTABLE_PLAYERS_TABLE,
+        warnings: ['No records found to validate schema'],
+      });
+    }
+    const fields = records[0]?.fields || {};
+    const missingFields = REQUIRED_PLAYER_FIELDS.filter((field) => !(field in fields));
+    return res.json({
+      ok: missingFields.length === 0,
+      table: AIRTABLE_PLAYERS_TABLE,
+      missingFields,
+    });
+  } catch (err: any) {
+    console.error('Error checking Airtable health', err);
+    res.status(500).json({
+      ok: false,
+      error: err.response?.data || err.message || 'Unknown error',
+    });
   }
 });
 
@@ -38,7 +92,7 @@ router.get('/test', async (_req, res) => {
       return res.status(500).json({ error: 'Airtable configuration is missing' });
     }
     const response = await axios.get(
-      `https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/Players?maxRecords=1`,
+      `https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${AIRTABLE_PLAYERS_TABLE}?maxRecords=1`,
       {
         headers: {
           Authorization: `Bearer ${AIRTABLE_API_KEY}`,
