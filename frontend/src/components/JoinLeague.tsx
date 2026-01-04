@@ -19,23 +19,53 @@ const JoinLeague: React.FC = () => {
         const initData = getTelegramInitData();
         const user = getTelegramUser();
 
+        // =========================
+        // COMPREHENSIVE DEBUGGING
+        // =========================
+        console.log('==================== JOIN LEAGUE DEBUG ====================');
+        console.log('1. Telegram WebApp Object:', tg);
+        console.log('2. InitData String:', initData);
+        console.log('3. User Object:', user);
+        console.log('4. window.Telegram:', (window as any).Telegram);
+        console.log('5. window.Telegram.WebApp:', (window as any).Telegram?.WebApp);
+        console.log('6. initDataUnsafe:', (window as any).Telegram?.WebApp?.initDataUnsafe);
+        console.log('7. initDataUnsafe.user:', (window as any).Telegram?.WebApp?.initDataUnsafe?.user);
+        console.log('===========================================================');
+
         // Better error checking
         if (!tg) {
+            console.error('❌ Error: Telegram WebApp is not available');
             alert('Telegram WebApp is not available. Please open this app from Telegram.');
             return;
         }
 
         if (!initData) {
+            console.error('❌ Error: Telegram initData is missing');
+            console.log('Telegram WebApp object:', tg);
             alert('Telegram initData is missing. Please ensure you opened this app correctly from Telegram.');
             return;
         }
 
         if (!user) {
+            console.error('❌ Error: Telegram user information is not available');
+            console.log('InitData:', initData);
+            console.log('Trying to parse initData manually:');
+            try {
+                const params = new URLSearchParams(initData);
+                const userParam = params.get('user');
+                console.log('User parameter from initData:', userParam);
+                if (userParam) {
+                    console.log('Parsed user:', JSON.parse(userParam));
+                }
+            } catch (e) {
+                console.error('Failed to parse initData:', e);
+            }
             alert('Telegram user information is not available. Please open this app from Telegram.');
             return;
         }
 
         try {
+            console.log('✅ All checks passed! Sending request to backend...');
             tg?.HapticFeedback?.impactOccurred?.('light');
 
             const payload = {
@@ -45,10 +75,12 @@ const JoinLeague: React.FC = () => {
                 username: user.username
             };
 
-            await joinLeague(payload);
+            console.log('Payload to send:', payload);
+            const response = await joinLeague(payload);
+            console.log('✅ Success! Response:', response);
             alert('Ви успішно приєдналися до ліги!');
         } catch (err) {
-            console.error(err);
+            console.error('❌ Error joining league:', err);
             alert('Не вдалося приєднатися до ліги. Спробуйте ще раз пізніше.');
         }
     };
