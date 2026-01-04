@@ -18,7 +18,7 @@ const JoinLeague: React.FC = () => {
     }
     try {
       const name = `${user.first_name || ''} ${user.last_name || ''}`.trim();
-      await joinLeague({ telegramId: String(user.id), name, username: user.username });
+      await joinLeague({ telegramId: user.id, name, username: user.username });
       alert('Ви успішно приєдналися до ліги!');
     } catch (err) {
       console.error(err);

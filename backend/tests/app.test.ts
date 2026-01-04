@@ -48,7 +48,7 @@ describe('players routes', () => {
 
     expect(response.status).toBe(201);
     expect(mockCreatePlayer).toHaveBeenCalledWith({
-      telegramId: '123',
+      telegramId: 123,
       name: 'Player One',
       username: undefined,
     });

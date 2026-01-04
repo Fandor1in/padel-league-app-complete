@@ -35,8 +35,17 @@ router.post('/', async (req, res) => {
   if (!telegramId || !name) {
     return res.status(400).json({ message: 'Missing required fields' });
   }
+  const parsedTelegramId =
+    typeof telegramId === 'number' ? telegramId : Number(telegramId);
+  if (!Number.isFinite(parsedTelegramId)) {
+    return res.status(400).json({ message: 'Invalid telegramId' });
+  }
   try {
-    const record = await createPlayer({ telegramId, name, username });
+    const record = await createPlayer({
+      telegramId: parsedTelegramId,
+      name,
+      username,
+    });
     res.status(201).json({ message: 'Player created', record });
   } catch (err) {
     console.error('Error creating player', err);

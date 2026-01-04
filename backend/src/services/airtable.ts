@@ -29,7 +29,7 @@ const PAIRS_TABLE = AIRTABLE_PAIRS_TABLE;
 const MATCHES_TABLE = AIRTABLE_MATCHES_TABLE;
 
 export interface PlayerInput {
-  telegramId: string;
+  telegramId: number | string;
   name: string;
   username?: string;
 }
