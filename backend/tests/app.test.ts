@@ -1,3 +1,5 @@
+process.env.ALLOW_UNVERIFIED_TELEGRAM = 'true';
+
 import request from 'supertest';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import app from '../src/app';

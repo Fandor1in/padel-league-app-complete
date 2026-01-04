@@ -1,4 +1,5 @@
 // API helper functions to interact with the backend server
+import { getTelegramInitData } from './telegram';
 
 /**
  * Base URL for the backend. In a production deployment you should set
@@ -9,9 +10,10 @@
 const BASE_URL = import.meta.env.VITE_BACKEND_URL || '';
 
 export interface PlayerInput {
-  telegramId: number | string;
-  name: string;
+  telegramId?: number | string;
+  name?: string;
   username?: string;
+  initData?: string;
 }
 
 /**
@@ -19,12 +21,13 @@ export interface PlayerInput {
  * Sends a POST request to `/players` with the player's Telegram details.
  */
 export const joinLeague = async (player: PlayerInput) => {
+  const initData = player.initData || getTelegramInitData();
   const response = await fetch(`${BASE_URL}/players`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify(player),
+    body: JSON.stringify({ ...player, initData }),
   });
   if (!response.ok) {
     throw new Error('Failed to join league');
@@ -39,13 +42,14 @@ export const joinLeague = async (player: PlayerInput) => {
  */
 export const createPair = async (
   pair:
-    | { player1Id: string; player2Id: string }
-    | { playerIds: [string, string] | string[] },
+    | { player1Id: string; player2Id: string; initData?: string }
+    | { playerIds: [string, string] | string[]; initData?: string },
 ) => {
   const payload =
     'playerIds' in pair
       ? { player1Id: pair.playerIds[0], player2Id: pair.playerIds[1] }
       : pair;
+  const initData = pair.initData || getTelegramInitData();
 
   if (!payload.player1Id || !payload.player2Id) {
     throw new Error('Both player1Id and player2Id are required');
@@ -56,7 +60,7 @@ export const createPair = async (
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify(payload),
+    body: JSON.stringify({ ...payload, initData }),
   });
   if (!response.ok) {
     throw new Error('Failed to create pair');
@@ -73,13 +77,15 @@ export const addMatchResult = async (match: {
   pair1Id: string;
   pair2Id: string;
   scores: string[];
+  initData?: string;
 }) => {
+  const initData = match.initData || getTelegramInitData();
   const response = await fetch(`${BASE_URL}/matches`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify(match),
+    body: JSON.stringify({ ...match, initData }),
   });
   if (!response.ok) {
     throw new Error('Failed to submit match');

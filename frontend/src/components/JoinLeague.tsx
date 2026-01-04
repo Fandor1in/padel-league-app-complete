@@ -1,5 +1,10 @@
 import React from 'react';
 import { joinLeague } from '../services/api';
+import {
+  getTelegramInitData,
+  getTelegramUser,
+  getTelegramWebApp,
+} from '../services/telegram';
 
 /**
  * Component that allows a user to join the padel league.  When rendered inside
@@ -10,15 +15,22 @@ import { joinLeague } from '../services/api';
 const JoinLeague: React.FC = () => {
   const handleJoin = async () => {
     // Access Telegram WebApp init data to get user details
-    const tg = (window as any).Telegram?.WebApp;
-    const user = tg?.initDataUnsafe?.user;
-    if (!user) {
+    const tg = getTelegramWebApp();
+    const initData = getTelegramInitData();
+    const user = getTelegramUser();
+    if (!initData || !user) {
       alert('Telegram user information is not available. Please open this app from Telegram.');
       return;
     }
     try {
       const name = `${user.first_name || ''} ${user.last_name || ''}`.trim();
-      await joinLeague({ telegramId: user.id, name, username: user.username });
+      tg?.HapticFeedback?.impactOccurred?.('light');
+      await joinLeague({
+        initData,
+        telegramId: user.id,
+        name,
+        username: user.username,
+      });
       alert('Ви успішно приєдналися до ліги!');
     } catch (err) {
       console.error(err);

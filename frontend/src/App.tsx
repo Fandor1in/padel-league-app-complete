@@ -1,8 +1,13 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import JoinLeague from './components/JoinLeague';
 import NavBar from './components/NavBar';
+import { initTelegramWebApp } from './services/telegram';
 
 const App: React.FC = () => {
+  useEffect(() => {
+    initTelegramWebApp();
+  }, []);
+
   return (
     <div className="app">
       <NavBar />

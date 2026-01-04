@@ -1,13 +1,16 @@
 import { Router } from 'express';
 import { getPlayers, createPlayer } from '../services/airtable';
 import {
+  ALLOW_UNVERIFIED_TELEGRAM,
   AIRTABLE_API_KEY,
   AIRTABLE_BASE_ID,
   AIRTABLE_PLAYERS_TABLE,
 } from '../config';
 import axios from 'axios';
+import { requireTelegramAuth, TelegramRequest } from '../middleware/requireTelegramAuth';
 
 const router = Router();
+router.use(requireTelegramAuth);
 const REQUIRED_PLAYER_FIELDS = [
   'Telegram ID',
   'Name',
@@ -30,17 +33,32 @@ router.get('/', async (_req, res) => {
 });
 
 // POST /players – create a new player in Airtable
-router.post('/', async (req, res) => {
-  const { telegramId, name, username } = req.body;
-  if (!telegramId || !name) {
-    return res.status(400).json({ message: 'Missing required fields' });
-  }
+router.post('/', async (req: TelegramRequest, res) => {
+  const { telegramId, name, username } = req.body || {};
   const parsedTelegramId =
     typeof telegramId === 'number' ? telegramId : Number(telegramId);
-  if (!Number.isFinite(parsedTelegramId)) {
-    return res.status(400).json({ message: 'Invalid telegramId' });
-  }
   try {
+    if (req.telegramUser) {
+      const resolvedName =
+        `${req.telegramUser.first_name || ''} ${req.telegramUser.last_name || ''}`.trim() ||
+        req.telegramUser.username ||
+        'Telegram User';
+      const record = await createPlayer({
+        telegramId: req.telegramUser.id,
+        name: resolvedName,
+        username: req.telegramUser.username,
+      });
+      return res.status(201).json({ message: 'Player created', record });
+    }
+
+    if (!ALLOW_UNVERIFIED_TELEGRAM) {
+      return res.status(401).json({ message: 'Telegram initData is required' });
+    }
+
+    if (!Number.isFinite(parsedTelegramId) || !name) {
+      return res.status(400).json({ message: 'Missing or invalid fields' });
+    }
+
     const record = await createPlayer({
       telegramId: parsedTelegramId,
       name,

@@ -21,3 +21,6 @@ export const AIRTABLE_MATCH_PAIR2_FIELD =
   process.env.AIRTABLE_MATCH_PAIR2_FIELD || 'Pair 2';
 export const AIRTABLE_MATCH_SCORES_FIELD =
   process.env.AIRTABLE_MATCH_SCORES_FIELD || 'Scores';
+export const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN || '';
+export const ALLOW_UNVERIFIED_TELEGRAM =
+  process.env.ALLOW_UNVERIFIED_TELEGRAM === 'true';

@@ -1,8 +1,10 @@
 import { Router } from 'express';
+import { requireTelegramAuth } from '../middleware/requireTelegramAuth';
 import { createMatch, getMatches } from '../services/airtable';
 import { validatePadelScore } from '../utils/validateScore';
 
 const router = Router();
+router.use(requireTelegramAuth);
 
 // GET /matches
 router.get('/', async (_req, res) => {

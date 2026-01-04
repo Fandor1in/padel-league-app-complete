@@ -1,7 +1,9 @@
 import { Router } from 'express';
+import { requireTelegramAuth } from '../middleware/requireTelegramAuth';
 import { createPair, getPairs } from '../services/airtable';
 
 const router = Router();
+router.use(requireTelegramAuth);
 
 // GET /pairs
 router.get('/', async (_req, res) => {
