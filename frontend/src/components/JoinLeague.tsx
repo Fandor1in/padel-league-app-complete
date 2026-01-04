@@ -18,19 +18,25 @@ const JoinLeague: React.FC = () => {
     const tg = getTelegramWebApp();
     const initData = getTelegramInitData();
     const user = getTelegramUser();
-    if (!initData || !user) {
-      alert('Telegram user information is not available. Please open this app from Telegram.');
+    if (!initData) {
+      alert('Telegram initData is missing. Please open this app from the Telegram WebApp menu.');
       return;
     }
     try {
-      const name = `${user.first_name || ''} ${user.last_name || ''}`.trim();
       tg?.HapticFeedback?.impactOccurred?.('light');
-      await joinLeague({
-        initData,
-        telegramId: user.id,
-        name,
-        username: user.username,
-      });
+      const payload = { initData } as {
+        initData: string;
+        telegramId?: number;
+        name?: string;
+        username?: string;
+      };
+      if (user) {
+        const name = `${user.first_name || ''} ${user.last_name || ''}`.trim();
+        payload.telegramId = user.id;
+        payload.name = name || user.username || 'Telegram User';
+        payload.username = user.username;
+      }
+      await joinLeague(payload);
       alert('Ви успішно приєдналися до ліги!');
     } catch (err) {
       console.error(err);
