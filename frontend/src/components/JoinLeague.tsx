@@ -27,16 +27,34 @@ const JoinLeague: React.FC = () => {
   };
 
   return (
-    <div className="space-y-4">
-      <h1 className="text-2xl font-semibold">Приєднатися до падель‑ліги</h1>
-      <p>Натисніть кнопку нижче, щоб зареєструватися через Telegram.</p>
-      <button
-        onClick={handleJoin}
-        className="px-4 py-2 rounded-md border border-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
-      >
-        Приєднатися
-      </button>
-    </div>
+    <section className="hero">
+      <div className="hero__card">
+        <p className="hero__eyebrow">Почнімо сезон</p>
+        <h1 className="hero__title">Приєднатися до падель‑ліги</h1>
+        <p className="hero__subtitle">
+          Зареєструйтесь через Telegram, щоб отримати рейтинг, команду та доступ до
+          результатів матчів.
+        </p>
+        <div className="hero__meta">
+          <div>
+            <p className="hero__meta-label">Формат</p>
+            <p className="hero__meta-value">2v2, підтвердження матчу</p>
+          </div>
+          <div>
+            <p className="hero__meta-label">Статистика</p>
+            <p className="hero__meta-value">Рейтинг, перемоги, серії</p>
+          </div>
+        </div>
+        <button onClick={handleJoin} className="hero__button">
+          Приєднатися
+        </button>
+        <p className="hero__footnote">Працює тільки всередині Telegram.</p>
+      </div>
+      <div className="hero__accent" aria-hidden="true">
+        <div className="hero__ball" />
+        <div className="hero__grid" />
+      </div>
+    </section>
   );
 };
 

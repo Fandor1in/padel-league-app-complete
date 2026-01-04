@@ -4,9 +4,9 @@ import NavBar from './components/NavBar';
 
 const App: React.FC = () => {
   return (
-    <div>
+    <div className="app">
       <NavBar />
-      <main className="p-4">
+      <main className="main">
         {/* Add routing logic here in a real app */}
         <JoinLeague />
       </main>
